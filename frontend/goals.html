@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ArthSathi | लक्ष्य</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/character.css">
+<style>
+.goals-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px;margin:12px 0}
+.goal-card{background:#F1F8E9;border:2px solid #C8E6C9;border-radius:var(--radius-sm);padding:16px 8px;text-align:center;cursor:pointer;transition:all .2s;font-family:inherit}
+.goal-card.selected{border-color:var(--primary);background:var(--primary);color:#fff}
+.goal-card .g-icon{font-size:32px;display:block;margin-bottom:6px}
+.goal-card .g-label{font-size:13px;font-weight:700;line-height:1.3}
+.subtitle{font-size:13px;color:var(--text-light);margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="screen" style="padding-bottom:160px">
+  <div class="app-header"><div class="app-logo">Arth<span>Sathi</span></div></div>
+
+  <div class="speech-bubble" id="g-bubble">
+    आप क्या हासिल करना चाहते हैं?
+    <button class="speak-btn" onclick="speakQ()">🔊</button>
+  </div>
+
+  <p class="subtitle" id="g-sub">एक या अधिक चुनें</p>
+
+  <div class="goals-grid" id="goals-grid">
+    <div class="goal-card" id="g-farming"        onclick="toggle('farming')">
+      <span class="g-icon">🌾</span><span class="g-label" id="lbl-farming">खेती में मदद</span>
+    </div>
+    <div class="goal-card" id="g-education"      onclick="toggle('education')">
+      <span class="g-icon">📚</span><span class="g-label" id="lbl-education">बच्चों की पढ़ाई</span>
+    </div>
+    <div class="goal-card" id="g-health"         onclick="toggle('health')">
+      <span class="g-icon">🏥</span><span class="g-label" id="lbl-health">स्वास्थ्य / बीमा</span>
+    </div>
+    <div class="goal-card" id="g-business"       onclick="toggle('business')">
+      <span class="g-icon">💼</span><span class="g-label" id="lbl-business">व्यापार शुरू करें</span>
+    </div>
+    <div class="goal-card" id="g-housing"        onclick="toggle('housing')">
+      <span class="g-icon">🏠</span><span class="g-label" id="lbl-housing">घर बनाएं</span>
+    </div>
+    <div class="goal-card" id="g-women"          onclick="toggle('women_empowerment')">
+      <span class="g-icon">👩</span><span class="g-label" id="lbl-women">महिला सशक्तिकरण</span>
+    </div>
+    <div class="goal-card" id="g-employment"     onclick="toggle('employment')">
+      <span class="g-icon">🔧</span><span class="g-label" id="lbl-employment">नौकरी / रोजगार</span>
+    </div>
+    <div class="goal-card" id="g-social"         onclick="toggle('social_welfare')">
+      <span class="g-icon">🤝</span><span class="g-label" id="lbl-social">सामाजिक सहायता</span>
+    </div>
+  </div>
+
+  <div class="error-msg" id="g-err" style="display:none;color:#C62828;font-size:13px;font-weight:600"></div>
+
+  <button class="btn-primary pulse" id="g-next"
+          style="display:none;margin-top:8px" onclick="goNext()">
+    योजनाएं देखें →
+  </button>
+
+  <div class="progress-dots" style="margin-top:20px">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot active"></div>
+    <div class="dot"></div>
+  </div>
+</div>
+
+<div class="character-guide">
+  <div class="speech-bubble-guide" id="g-guide">अपना लक्ष्य चुनें 👆</div>
+  <div class="character-figure" id="guide-fig"></div>
+</div>
+
+<script src="js/speech.js"></script>
+<script src="js/app.js"></script>
+<script>
+var L = {}, selected = {};
+
+window.addEventListener('load', function(){
+  buildChar();
+  var lc = localStorage.getItem('as_language') || 'hi';
+  fetch('lang/' + lc + '.json')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      L = d;
+      // Apply labels
+      var sl = L.lang_fallback || L.lang_code;
+      setText('g-bubble', (L.goals_title || 'आप क्या हासिल करना चाहते हैं?') + ' ');
+      setText('g-sub',    L.goals_subtitle || 'एक या अधिक चुनें');
+      setText('lbl-farming',    L.goal_farming    || 'खेती में मदद');
+      setText('lbl-education',  L.goal_education  || 'बच्चों की पढ़ाई');
+      setText('lbl-health',     L.goal_health     || 'स्वास्थ्य / बीमा');
+      setText('lbl-business',   L.goal_business   || 'व्यापार शुरू करें');
+      setText('lbl-housing',    L.goal_housing    || 'घर बनाएं');
+      setText('lbl-women',      L.goal_women      || 'महिला सशक्तिकरण');
+      setText('lbl-employment', L.goal_employment || 'नौकरी / रोजगार');
+      setText('lbl-social',     L.goal_social     || 'सामाजिक सहायता');
+      setText('g-next', (L.goals_next || 'योजनाएं देखें') + ' →');
+      setText('g-guide', (L.goals_title || 'अपना लक्ष्य चुनें') + ' 👆');
+      setTimeout(function(){ speak(L.goals_speak || L.goals_title, sl); }, 600);
+    });
+});
+
+function setText(id, txt){
+  var el = document.getElementById(id);
+  if(el) el.textContent = txt;
+}
+
+function speakQ(){
+  speak(L.goals_speak || L.goals_title, L.lang_fallback || L.lang_code);
+}
+
+// Map card id suffix → goal_category value
+var GOAL_MAP = {
+  'farming':'farming', 'education':'education', 'health':'health',
+  'business':'business', 'housing':'housing', 'women':'women_empowerment',
+  'employment':'employment', 'social':'social_welfare'
+};
+
+function toggle(cat){
+  // Find card by data mapping
+  var cardId = 'g-' + Object.keys(GOAL_MAP).find(function(k){ return GOAL_MAP[k]===cat; });
+  var card = document.getElementById(cardId);
+  if(!card) return;
+
+  if(selected[cat]){
+    delete selected[cat];
+    card.classList.remove('selected');
+  } else {
+    selected[cat] = true;
+    card.classList.add('selected');
+  }
+
+  var anySelected = Object.keys(selected).length > 0;
+  document.getElementById('g-next').style.display = anySelected ? 'inline-block' : 'none';
+  document.getElementById('g-err').style.display  = 'none';
+}
+
+function goNext(){
+  if(!Object.keys(selected).length){
+    var err = L.goals_error || 'कृपया कम से कम एक विकल्प चुनें।';
+    document.getElementById('g-err').textContent = err;
+    document.getElementById('g-err').style.display = 'block';
+    speak(err, L.lang_fallback || L.lang_code);
+    return;
+  }
+
+  var userId = localStorage.getItem('as_user_id');
+  if(!userId){ window.location.href = 'register.html'; return; }
+
+  // Build goals array for API
+  var goals = Object.keys(selected).map(function(cat){
+    return { goal_category: cat, goal_description: '' };
+  });
+
+  // Save goals via profile save (goals only — no profile fields)
+  var sl = L.lang_fallback || L.lang_code;
+  speak(L.goals_speak_next || 'योजनाएं खोजी जा रही हैं।', sl);
+
+  apiCall('/profile/save', 'POST',
+    { user_id: parseInt(userId), goals: goals },
+    function(){ window.location.href = 'results.html'; },
+    function(msg){ speak(msg, sl); }
+  );
+}
+
+function buildChar(){
+  var name = localStorage.getItem('character') || 'arth';
+  var fig  = document.getElementById('guide-fig');
+  fig.className = 'character-figure ' + name;
+  if(name === 'arth'){
+    fig.innerHTML =
+      '<div class="char-hair-male"></div>'+
+      '<div class="char-head"><div class="char-eyes">'+
+      '<div class="char-eye"></div><div class="char-eye"></div>'+
+      '</div><div class="char-mouth"></div></div>'+
+      '<div class="char-neck"></div>'+
+      '<div class="char-body char-body-male"></div>'+
+      '<div class="char-arm char-arm-left arth"></div>'+
+      '<div class="char-arm char-arm-right arth"></div>'+
+      '<div class="char-leg char-leg-left arth"></div>'+
+      '<div class="char-leg char-leg-right arth"></div>'+
+      '<div class="char-shoe char-shoe-left"></div>'+
+      '<div class="char-shoe char-shoe-right"></div>';
+  } else {
+    fig.innerHTML =
+      '<div class="char-hair-female"></div>'+
+      '<div class="char-head"><div class="char-eyes">'+
+      '<div class="char-eye"></div><div class="char-eye"></div>'+
+      '</div><div class="char-mouth"></div></div>'+
+      '<div class="char-neck"></div>'+
+      '<div class="char-body char-body-female"></div>'+
+      '<div class="char-arm char-arm-left sathi"></div>'+
+      '<div class="char-arm char-arm-right sathi"></div>'+
+      '<div class="char-leg char-leg-left sathi"></div>'+
+      '<div class="char-leg char-leg-right sathi"></div>';
+  }
+}
+</script>
+</body>
+</html>

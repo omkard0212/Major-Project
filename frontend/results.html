@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ArthSathi | योजनाएं</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/character.css">
+<style>
+.loading-box{text-align:center;padding:40px 20px}
+.loading-spinner{width:48px;height:48px;border:4px solid #C8E6C9;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+.loading-text{font-size:16px;font-weight:600;color:var(--text-mid)}
+
+.results-header{width:100%;max-width:380px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.eligible-badge{background:var(--primary);color:#fff;border-radius:50px;padding:4px 14px;font-size:13px;font-weight:700}
+
+/* Scheme card */
+.scheme-card{background:#fff;border-radius:var(--radius);box-shadow:var(--card-shadow);padding:18px;width:100%;max-width:380px;margin-bottom:16px;border-left:5px solid var(--primary)}
+.scheme-card.top1{border-left-color:#FF8F00}
+
+/* Match bar */
+.match-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.match-label{font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;white-space:nowrap}
+.match-bar{flex:1;height:6px;background:#E8F5E9;border-radius:3px;overflow:hidden}
+.match-bar-fill{height:100%;background:var(--primary);border-radius:3px}
+.match-pct{font-size:11px;font-weight:700;color:var(--primary);white-space:nowrap}
+
+.scheme-rank{font-size:11px;font-weight:700;color:var(--text-light);margin-bottom:4px}
+.scheme-name{font-size:15px;font-weight:700;color:var(--text-dark);line-height:1.4;margin-bottom:10px}
+.scheme-badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.badge{padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700}
+.badge-state{background:#E3F2FD;color:#1565C0}
+.badge-central{background:#F3E5F5;color:#6A1B9A}
+.badge-benefit{background:#E8F5E9;color:#2E7D32}
+
+/* Info rows */
+.info-row{font-size:13px;color:var(--text-mid);margin-bottom:6px;line-height:1.5}
+.info-row .lbl{font-weight:700;color:var(--text-dark)}
+
+/* How to apply toggle */
+.how-toggle{font-size:13px;color:var(--primary);font-weight:600;cursor:pointer;background:none;border:none;padding:4px 0;font-family:inherit;display:block;margin-top:4px}
+.how-content{font-size:13px;color:var(--text-mid);line-height:1.6;margin-top:8px;display:none;border-top:1px solid #E8F5E9;padding-top:8px}
+.how-content.open{display:block}
+
+/* Action buttons */
+.card-actions{display:flex;gap:10px;margin-top:14px}
+.btn-save{flex:1;padding:10px;background:#E8F5E9;border:2px solid var(--primary);border-radius:50px;color:var(--primary);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-save.saved{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-apply{flex:1;padding:10px;background:var(--primary);border:none;border-radius:50px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(46,125,50,.35);transition:all .2s}
+.btn-apply:active{transform:scale(.97)}
+
+.no-results{text-align:center;padding:40px 20px;color:var(--text-mid);font-size:15px}
+.no-results .emoji{font-size:48px;display:block;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="screen" id="screen-results" style="padding-bottom:160px;align-items:flex-start">
+
+  <div class="app-header" style="width:100%;text-align:center">
+    <div class="app-logo">Arth<span>Sathi</span></div>
+  </div>
+
+  <div class="speech-bubble" id="r-bubble" style="max-width:380px">
+    आपके लिए योजनाएं खोजी जा रही हैं...
+    <button class="speak-btn" onclick="speakBubble()">🔊</button>
+  </div>
+
+  <div id="r-content" style="width:100%;max-width:380px">
+    <div class="loading-box" id="r-loading">
+      <div class="loading-spinner"></div>
+      <p class="loading-text" id="r-loading-text">खोज रहे हैं...</p>
+    </div>
+  </div>
+
+  <div class="progress-dots" style="margin-top:20px;width:100%;justify-content:center;display:flex">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot active"></div>
+  </div>
+</div>
+
+<div class="character-guide">
+  <div class="speech-bubble-guide" id="r-guide">योजनाएं मिल रही हैं 🔍</div>
+  <div class="character-figure" id="guide-fig"></div>
+</div>
+
+<script src="js/speech.js"></script>
+<script src="js/app.js"></script>
+<script>
+var L = {};
+
+window.addEventListener('load', function(){
+  buildChar();
+  var lc = localStorage.getItem('as_language') || 'hi';
+  fetch('lang/' + lc + '.json')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      L = d;
+      applyLang();
+      var sl = L.lang_fallback || L.lang_code;
+      setTimeout(function(){
+        speak(L.results_loading_speak || L.results_loading || 'योजनाएं खोजी जा रही हैं', sl, function(){
+          loadRecommendations();
+        });
+      }, 500);
+    })
+    .catch(function(){ loadRecommendations(); });
+});
+
+function applyLang(){
+  setText('r-bubble',       (L.results_loading || 'योजनाएं खोजी जा रही हैं...') + ' ');
+  setText('r-loading-text', L.results_loading  || 'खोज रहे हैं...');
+  setText('r-guide',        (L.results_loading || 'योजनाएं मिल रही हैं') + ' 🔍');
+}
+
+function loadRecommendations(){
+  var userId = localStorage.getItem('as_user_id');
+  if(!userId){ window.location.href = 'register.html'; return; }
+
+  apiCall('/schemes/recommend', 'POST', { user_id: parseInt(userId) },
+    function(data){ renderResults(data); },
+    function(msg){
+      document.getElementById('r-content').innerHTML =
+        '<div class="no-results"><span class="emoji">😕</span><p>' + (msg || 'Error') + '</p></div>';
+    }
+  );
+}
+
+function renderResults(data){
+  var sl  = L.lang_fallback || L.lang_code;
+  var box = document.getElementById('r-content');
+
+  if(!data.recommendations || !data.recommendations.length){
+    box.innerHTML = '<div class="no-results"><span class="emoji">😕</span><p>' +
+      (L.results_none || 'कोई योजना नहीं मिली।') + '</p></div>';
+    speak(L.results_none || 'कोई योजना नहीं मिली', sl);
+    return;
+  }
+
+  // Update bubble and guide
+  setText('r-bubble', (L.results_title || 'आपके लिए ये योजनाएं हैं') + ' ');
+  setText('r-guide',  data.eligible_count + ' ' + (L.results_eligible || 'योजनाएं') + ' ✅');
+  speak(L.results_speak || L.results_title || 'आपके लिए योजनाएं मिलीं', sl);
+
+  // Results header
+  var html =
+    '<div class="results-header">' +
+      '<span style="font-size:14px;font-weight:700;color:var(--text-dark)">' +
+        (L.results_title || 'आपके लिए योजनाएं') +
+      '</span>' +
+      '<span class="eligible-badge">' +
+        data.eligible_count + ' ' + (L.results_eligible || 'योजनाएं') +
+      '</span>' +
+    '</div>';
+
+  // Max score for percentage calculation
+  var maxScore = data.recommendations[0] ? data.recommendations[0].score : 100;
+
+  data.recommendations.forEach(function(s, i){
+    var isTop = i === 0;
+
+    // Match percentage (relative to top score)
+    var pct = maxScore > 0 ? Math.round((s.score / maxScore) * 100) : 80;
+    pct = Math.min(pct, 99); // cap at 99% to avoid false "100% perfect"
+
+    // Level badge
+    var levelBadge = s.level === 'Central'
+      ? '<span class="badge badge-central">' + (L.results_level_central || 'केंद्रीय') + '</span>'
+      : '<span class="badge badge-state">' + (s.state ? s.state.split(',')[0] : (L.results_level_state || 'राज्य')) + '</span>';
+
+    // Benefit badge
+    var benefitBadge = (s.benefit && s.benefit !== 'Varies' && s.benefit !== 'N/A')
+      ? '<span class="badge badge-benefit">' + s.benefit + '</span>'
+      : '';
+
+    // Category — show first category only, trimmed
+    var cat = (s.category || '').split(',')[0].split('&')[0].trim();
+
+    html +=
+      '<div class="scheme-card' + (isTop ? ' top1' : '') + '">' +
+
+        // Rank row
+        '<div class="scheme-rank">' +
+          (L.results_scheme_no || 'योजना') + ' #' + s.rank +
+        '</div>' +
+
+        // Match bar
+        '<div class="match-row">' +
+          '<span class="match-label">' + (L.results_score || 'मिलान') + '</span>' +
+          '<div class="match-bar"><div class="match-bar-fill" style="width:' + pct + '%"></div></div>' +
+          '<span class="match-pct">' + pct + '%</span>' +
+        '</div>' +
+
+        // Scheme name
+        '<div class="scheme-name">' + s.scheme_name + '</div>' +
+
+        // Badges
+        '<div class="scheme-badge-row">' + levelBadge + benefitBadge + '</div>' +
+
+        // Benefit
+        '<div class="info-row">' +
+          '<span class="lbl">' + (L.results_benefit || 'लाभ') + ': </span>' +
+          (s.benefit || '—') +
+        '</div>' +
+
+        // Category
+        (cat ? '<div class="info-row"><span class="lbl">' + (L.results_category || 'श्रेणी') + ': </span>' + cat + '</div>' : '') +
+
+        // How to apply toggle
+        '<button class="how-toggle" onclick="toggleHow(' + i + ')">' +
+          '▶ ' + (L.results_how_to_apply || 'कैसे आवेदन करें') +
+        '</button>' +
+        '<div class="how-content" id="how-' + i + '">' +
+          (s.how_to_apply || '—') +
+        '</div>' +
+
+        // Action buttons
+        '<div class="card-actions">' +
+          '<button class="btn-save" id="save-' + i + '" ' +
+            'onclick="saveScheme(' + i + ',\'' + esc(s.slug) + '\',\'' + esc(s.scheme_name) + '\',' + s.score + ')">' +
+            '🔖 ' + (L.results_save || 'सहेजें') +
+          '</button>' +
+          '<button class="btn-apply" ' +
+            'onclick="applyScheme(' + i + ',\'' + esc(s.slug) + '\',\'' + esc(s.scheme_name) + '\',' + s.score + ')">' +
+            '✅ ' + (L.results_apply || 'आवेदन करें') +
+          '</button>' +
+        '</div>' +
+
+      '</div>';
+  });
+
+  box.innerHTML = html;
+}
+
+function toggleHow(i){
+  var el   = document.getElementById('how-' + i);
+  var btn  = el.previousElementSibling;
+  var open = el.classList.toggle('open');
+  btn.textContent = (open ? '▼ ' : '▶ ') + (L.results_how_to_apply || 'कैसे आवेदन करें');
+}
+
+function saveScheme(i, slug, name, score){
+  var userId = parseInt(localStorage.getItem('as_user_id'));
+  var btn = document.getElementById('save-' + i);
+  btn.classList.add('saved');
+  btn.textContent = '✓ ' + (L.results_saved_msg || L.results_save || 'सहेजा');
+  apiCall('/schemes/interaction', 'POST',
+    { user_id: userId, scheme_slug: slug, scheme_name: name, action: 'select', score: score },
+    null, null);
+  speak((L.results_saved_msg || L.results_save || 'सहेजा') + '!', L.lang_fallback || L.lang_code);
+}
+
+function applyScheme(i, slug, name, score){
+  var userId = parseInt(localStorage.getItem('as_user_id'));
+  apiCall('/schemes/interaction', 'POST',
+    { user_id: userId, scheme_slug: slug, scheme_name: name, action: 'apply', score: score },
+    null, null);
+  apiCall('/schemes/interaction', 'POST',
+    { user_id: userId, scheme_slug: slug, scheme_name: name, action: 'view', score: score },
+    null, null);
+  speak((L.results_tap_apply || L.results_apply || 'आवेदन') + ': ' + name, L.lang_fallback || L.lang_code);
+}
+
+function speakBubble(){
+  var txt = document.getElementById('r-bubble').childNodes[0].textContent;
+  speak(txt, L.lang_fallback || L.lang_code);
+}
+
+function esc(s){ return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function setText(id,t){ var e=document.getElementById(id); if(e) e.textContent=t; }
+
+function buildChar(){
+  var name = localStorage.getItem('character') || 'arth';
+  var fig  = document.getElementById('guide-fig');
+  fig.className = 'character-figure ' + name;
+  if(name === 'arth'){
+    fig.innerHTML =
+      '<div class="char-hair-male"></div>'+
+      '<div class="char-head"><div class="char-eyes">'+
+      '<div class="char-eye"></div><div class="char-eye"></div>'+
+      '</div><div class="char-mouth"></div></div>'+
+      '<div class="char-neck"></div>'+
+      '<div class="char-body char-body-male"></div>'+
+      '<div class="char-arm char-arm-left arth"></div>'+
+      '<div class="char-arm char-arm-right arth"></div>'+
+      '<div class="char-leg char-leg-left arth"></div>'+
+      '<div class="char-leg char-leg-right arth"></div>'+
+      '<div class="char-shoe char-shoe-left"></div>'+
+      '<div class="char-shoe char-shoe-right"></div>';
+  } else {
+    fig.innerHTML =
+      '<div class="char-hair-female"></div>'+
+      '<div class="char-head"><div class="char-eyes">'+
+      '<div class="char-eye"></div><div class="char-eye"></div>'+
+      '</div><div class="char-mouth"></div></div>'+
+      '<div class="char-neck"></div>'+
+      '<div class="char-body char-body-female"></div>'+
+      '<div class="char-arm char-arm-left sathi"></div>'+
+      '<div class="char-arm char-arm-right sathi"></div>'+
+      '<div class="char-leg char-leg-left sathi"></div>'+
+      '<div class="char-leg char-leg-right sathi"></div>';
+  }
+}
+</script>
+</body>
+</html>

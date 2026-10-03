@@ -1,0 +1,13 @@
+# ArthSathi — All Python dependencies
+# Run: pip install -r requirements.txt
+
+# Backend (Flask API)
+flask==3.0.3
+flask-cors==4.0.1
+psycopg2-binary==2.9.9
+bcrypt==4.1.3
+python-dotenv==1.0.1
+
+# ML Model
+pandas==2.2.2
+numpy==1.26.4

@@ -1,0 +1,323 @@
+/* ============================================
+   ArthSathi — 2D CSS Animated Characters
+   Arth (Male) and Sathi (Female)
+   ============================================ */
+
+/* ── Character wrapper ────────────────────── */
+.character-figure {
+    width: 90px;
+    height: 130px;
+    position: relative;
+    margin: 0 auto;
+    animation: characterIdle 3s ease-in-out infinite;
+}
+
+@keyframes characterIdle {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+}
+
+/* ── HEAD ─────────────────────────────────── */
+.char-head {
+    width: 50px;
+    height: 54px;
+    border-radius: 50% 50% 45% 45%;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    z-index: 3;
+}
+
+/* ── HAIR — male (short) ──────────────────── */
+.char-hair-male {
+    width: 54px;
+    height: 22px;
+    border-radius: 50% 50% 0 0;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -4px;
+    z-index: 4;
+    background: #3E2723;
+}
+
+/* ── HAIR — female (long) ─────────────────── */
+.char-hair-female {
+    width: 54px;
+    height: 70px;
+    border-radius: 50% 50% 30% 30%;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -4px;
+    z-index: 2;
+    background: #3E2723;
+}
+
+.char-hair-female::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 50px;
+    background: #3E2723;
+    border-radius: 0 0 10px 10px;
+    right: -2px;
+    top: 20px;
+}
+
+/* ── EYES ─────────────────────────────────── */
+.char-eyes {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 5;
+}
+
+.char-eye {
+    width: 8px;
+    height: 9px;
+    background: #1B2631;
+    border-radius: 50%;
+    animation: blink 4s infinite;
+    position: relative;
+}
+
+/* Eye shine */
+.char-eye::after {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: white;
+    border-radius: 50%;
+    top: 1px;
+    right: 1px;
+}
+
+@keyframes blink {
+    0%, 90%, 100% { transform: scaleY(1); }
+    95%            { transform: scaleY(0.1); }
+}
+
+/* ── SMILE ────────────────────────────────── */
+.char-mouth {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 9px;
+    border-bottom: 3px solid #C0392B;
+    border-radius: 0 0 12px 12px;
+    z-index: 5;
+}
+
+/* ── NECK ─────────────────────────────────── */
+.char-neck {
+    width: 16px;
+    height: 10px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 50px;
+    z-index: 2;
+    background: inherit;
+}
+
+/* ── BODY ─────────────────────────────────── */
+.char-body {
+    width: 56px;
+    height: 48px;
+    border-radius: 12px 12px 8px 8px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 58px;
+    z-index: 3;
+}
+
+/* ── KURTA detail line (male) ─────────────── */
+.char-body-male::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 30px;
+    background: rgba(255,255,255,0.3);
+    left: 50%;
+    top: 6px;
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+
+/* ── DUPATTA detail (female) ──────────────── */
+.char-body-female::before {
+    content: '';
+    position: absolute;
+    width: 28px;
+    height: 6px;
+    background: rgba(255,255,255,0.35);
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 4px;
+}
+
+/* ── ARMS ─────────────────────────────────── */
+.char-arm {
+    width: 14px;
+    height: 38px;
+    border-radius: 8px;
+    position: absolute;
+    top: 62px;
+    z-index: 2;
+}
+
+.char-arm-left {
+    left: 8px;
+    transform-origin: top center;
+    animation: waveArm 2.5s ease-in-out infinite;
+}
+
+.char-arm-right {
+    right: 8px;
+    transform-origin: top center;
+}
+
+@keyframes waveArm {
+    0%, 100% { transform: rotate(-10deg); }
+    50%       { transform: rotate(20deg); }
+}
+
+/* ── LEGS ─────────────────────────────────── */
+.char-leg {
+    width: 18px;
+    height: 28px;
+    border-radius: 0 0 8px 8px;
+    position: absolute;
+    top: 104px;
+    z-index: 2;
+}
+
+.char-leg-left  { left: 22px; }
+.char-leg-right { right: 22px; }
+
+/* ── SHOES ────────────────────────────────── */
+.char-shoe {
+    width: 22px;
+    height: 10px;
+    border-radius: 4px 10px 4px 4px;
+    position: absolute;
+    top: 130px;
+    background: #4E342E;
+    z-index: 2;
+}
+.char-shoe-left  { left: 18px; }
+.char-shoe-right { right: 16px; }
+
+/* ═══════════════════════════════════════════
+   MALE CHARACTER — Arth
+   Green kurta, dark trousers
+   ═══════════════════════════════════════════ */
+.arth .char-head       { background: #FFCC80; }
+.arth .char-neck       { background: #FFCC80; }
+.arth .char-body       { background: #2E7D32; }  /* green kurta */
+.arth .char-arm        { background: #2E7D32; }
+.arth .char-leg        { background: #37474F; }  /* dark trousers */
+
+/* ═══════════════════════════════════════════
+   FEMALE CHARACTER — Sathi
+   Orange saree, matching blouse
+   ═══════════════════════════════════════════ */
+.sathi .char-head      { background: #FFCC80; }
+.sathi .char-neck      { background: #FFCC80; }
+.sathi .char-body      { background: #E65100; }  /* orange saree */
+.sathi .char-arm       { background: #E65100; }
+.sathi .char-leg       { background: #E65100; }  /* saree continues */
+
+/* ── Bindi for Sathi ──────────────────────── */
+.sathi .char-head::after {
+    content: '';
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background: #C62828;
+    border-radius: 50%;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+}
+
+/* ── TALKING animation ────────────────────── */
+.character-figure.talking .char-mouth {
+    animation: talk 0.3s steps(1) infinite;
+}
+
+@keyframes talk {
+    0%   { height: 9px; }
+    50%  { height: 14px; border-radius: 0 0 8px 8px; }
+    100% { height: 9px; }
+}
+
+/* ── POINTING animation ───────────────────── */
+.character-figure.pointing .char-arm-right {
+    animation: pointRight 1s ease-in-out infinite;
+}
+
+@keyframes pointRight {
+    0%, 100% { transform: rotate(-30deg); }
+    50%       { transform: rotate(-50deg); }
+}
+
+/* ── NODDING animation ────────────────────── */
+.character-figure.nodding .char-head,
+.character-figure.nodding .char-hair-male,
+.character-figure.nodding .char-hair-female {
+    animation: nod 0.6s ease-in-out 3;
+}
+
+@keyframes nod {
+    0%, 100% { transform: translateX(-50%) rotate(0deg); }
+    25%       { transform: translateX(-50%) rotate(8deg); }
+    75%       { transform: translateX(-50%) rotate(-8deg); }
+}
+
+/* ── Large character (guide on all screens) ─ */
+.character-guide {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 100;
+    transform: scale(1.1);
+    transform-origin: bottom left;
+}
+
+.character-guide .speech-bubble-guide {
+    position: absolute;
+    bottom: 155px;
+    left: -10px;
+    background: white;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+    box-shadow: var(--card-shadow);
+    width: 200px;
+    line-height: 1.4;
+}
+
+.character-guide .speech-bubble-guide::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 20px;
+    border-width: 10px 8px 0 8px;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}

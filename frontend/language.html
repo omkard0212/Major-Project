@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>ArthSathi | भाषा चुनें</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/character.css">
+    <style>
+        .lang-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 360px;
+            margin: 16px 0;
+        }
+
+        .lang-btn {
+            background: var(--white);
+            border: 2px solid #C8E6C9;
+            border-radius: var(--radius-sm);
+            padding: 14px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .lang-btn:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .lang-btn.selected {
+            border-color: var(--primary);
+            background: #E8F5E9;
+        }
+
+        .lang-native {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: block;
+        }
+
+        .lang-english {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 3px;
+            display: block;
+        }
+
+        /* Animated arrow pointing to language grid */
+        .arrow-down-grid {
+            font-size: 30px;
+            color: var(--accent);
+            animation: bounceArrow 1s infinite;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="screen" id="screen-language">
+
+    <!-- App Logo -->
+    <div class="app-header">
+        <div class="app-logo">Arth<span>Sathi</span></div>
+    </div>
+
+    <!-- Speech bubble -->
+    <div class="speech-bubble" id="lang-question">
+        आप कौन सी भाषा पसंद करते हैं?
+        <button class="speak-btn" onclick="speakQuestion()" title="सुनें">🔊</button>
+    </div>
+
+    <!-- Arrow pointing to language grid -->
+    <div class="arrow-down-grid">↓</div>
+
+    <!-- Language selection grid -->
+    <div class="lang-grid" id="lang-grid">
+
+        <div class="lang-btn" id="btn-hi" onclick="selectLanguage('hi')">
+            <span class="lang-native">हिंदी</span>
+            <span class="lang-english">Hindi</span>
+        </div>
+
+        <div class="lang-btn" id="btn-mr" onclick="selectLanguage('mr')">
+            <span class="lang-native">मराठी</span>
+            <span class="lang-english">Marathi</span>
+        </div>
+
+        <div class="lang-btn" id="btn-gu" onclick="selectLanguage('gu')">
+            <span class="lang-native">ગુજરાતી</span>
+            <span class="lang-english">Gujarati</span>
+        </div>
+
+        <div class="lang-btn" id="btn-bn" onclick="selectLanguage('bn')">
+            <span class="lang-native">বাংলা</span>
+            <span class="lang-english">Bengali</span>
+        </div>
+
+        <div class="lang-btn" id="btn-ta" onclick="selectLanguage('ta')">
+            <span class="lang-native">தமிழ்</span>
+            <span class="lang-english">Tamil</span>
+        </div>
+
+        <div class="lang-btn" id="btn-te" onclick="selectLanguage('te')">
+            <span class="lang-native">తెలుగు</span>
+            <span class="lang-english">Telugu</span>
+        </div>
+
+        <div class="lang-btn" id="btn-kn" onclick="selectLanguage('kn')">
+            <span class="lang-native">ಕನ್ನಡ</span>
+            <span class="lang-english">Kannada</span>
+        </div>
+
+        <div class="lang-btn" id="btn-ml" onclick="selectLanguage('ml')">
+            <span class="lang-native">മലയാളം</span>
+            <span class="lang-english">Malayalam</span>
+        </div>
+
+        <div class="lang-btn" id="btn-pa" onclick="selectLanguage('pa')">
+            <span class="lang-native">ਪੰਜਾਬੀ</span>
+            <span class="lang-english">Punjabi</span>
+        </div>
+
+        <div class="lang-btn" id="btn-or" onclick="selectLanguage('or')">
+            <span class="lang-native">ଓଡ଼ିଆ</span>
+            <span class="lang-english">Odia</span>
+        </div>
+
+        <div class="lang-btn" id="btn-ur" onclick="selectLanguage('ur')">
+            <span class="lang-native">اردو</span>
+            <span class="lang-english">Urdu</span>
+        </div>
+
+        <div class="lang-btn" id="btn-en" onclick="selectLanguage('en')">
+            <span class="lang-native">English</span>
+            <span class="lang-english">English</span>
+        </div>
+
+    </div>
+
+    <!-- Continue button — hidden until language selected -->
+    <button class="btn-primary pulse" id="btn-continue"
+            style="display:none;"
+            onclick="goNext()">
+        आगे बढ़ें →
+    </button>
+
+    <!-- Progress dots — step 2 of 7 -->
+    <div class="progress-dots">
+        <div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+</div>
+
+<!-- Fixed character guide at bottom left -->
+<div class="character-guide" id="char-guide">
+    <div class="speech-bubble-guide" id="guide-bubble">
+        अपनी भाषा चुनें 👆
+    </div>
+    <div class="character-figure" id="guide-figure">
+        <!-- filled by JS based on chosen character -->
+    </div>
+</div>
+
+<script src="js/speech.js"></script>
+<script src="js/app.js"></script>
+<script>
+    var selectedLang   = null;
+    var currentLangData = null;
+
+    // Language code map for speech
+    var SPEECH_CODES = {
+        hi: 'hi-IN', mr: 'mr-IN', gu: 'gu-IN',
+        bn: 'bn-IN', ta: 'ta-IN', te: 'te-IN',
+        kn: 'kn-IN', ml: 'ml-IN', pa: 'pa-IN',
+        or: 'or-IN', ur: 'ur-IN', en: 'en-IN'
+    };
+
+    // Build the character in the guide based on Screen 1 choice
+    window.addEventListener('load', function() {
+        buildGuideCharacter();
+
+        // Try auto-speak immediately on load
+        // Works if user already interacted on previous screen
+        setTimeout(function() {
+            speak("आप कौन सी भाषा पसंद करते हैं?", 'hi-IN');
+        }, 600);
+    });
+
+    // Fallback: if browser blocked auto-speak,
+    // speak on first touch/click anywhere on the page
+    var hasSpoken = false;
+    document.addEventListener('click', function() {
+        if (!hasSpoken) {
+            hasSpoken = true;
+            speak("आप कौन सी भाषा पसंद करते हैं?", 'hi-IN');
+        }
+    }, { once: true });
+
+    function buildGuideCharacter() {
+        var charName = localStorage.getItem('character') || 'arth';
+        var fig = document.getElementById('guide-figure');
+
+        if (charName === 'arth') {
+            fig.innerHTML =
+                '<div class="char-hair-male"></div>' +
+                '<div class="char-head">' +
+                  '<div class="char-eyes">' +
+                    '<div class="char-eye"></div>' +
+                    '<div class="char-eye"></div>' +
+                  '</div>' +
+                  '<div class="char-mouth"></div>' +
+                '</div>' +
+                '<div class="char-neck"></div>' +
+                '<div class="char-body char-body-male"></div>' +
+                '<div class="char-arm char-arm-left arth"></div>' +
+                '<div class="char-arm char-arm-right arth"></div>' +
+                '<div class="char-leg char-leg-left arth"></div>' +
+                '<div class="char-leg char-leg-right arth"></div>' +
+                '<div class="char-shoe char-shoe-left"></div>' +
+                '<div class="char-shoe char-shoe-right"></div>';
+            fig.className = 'character-figure arth';
+        } else {
+            fig.innerHTML =
+                '<div class="char-hair-female"></div>' +
+                '<div class="char-head">' +
+                  '<div class="char-eyes">' +
+                    '<div class="char-eye"></div>' +
+                    '<div class="char-eye"></div>' +
+                  '</div>' +
+                  '<div class="char-mouth"></div>' +
+                '</div>' +
+                '<div class="char-neck"></div>' +
+                '<div class="char-body char-body-female"></div>' +
+                '<div class="char-arm char-arm-left sathi"></div>' +
+                '<div class="char-arm char-arm-right sathi"></div>' +
+                '<div class="char-leg char-leg-left sathi"></div>' +
+                '<div class="char-leg char-leg-right sathi"></div>';
+            fig.className = 'character-figure sathi';
+        }
+    }
+
+    function speakQuestion() {
+        if (currentLangData) {
+            speak(currentLangData.select_language_speak, currentLangData.lang_code);
+        } else {
+            speak("आप कौन सी भाषा पसंद करते हैं?", 'hi-IN');
+        }
+    }
+
+    function selectLanguage(code) {
+        selectedLang = code;
+
+        // Mark as spoken so fallback doesn't fire the question again
+        hasSpoken = true;
+
+        // Highlight selected button
+        document.querySelectorAll('.lang-btn').forEach(function(b) {
+            b.classList.remove('selected');
+        });
+        document.getElementById('btn-' + code).classList.add('selected');
+
+        // Load that language's JSON
+        fetch('lang/' + code + '.json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                currentLangData = data;
+
+                // Update speech bubble text
+                document.getElementById('lang-question').childNodes[0].textContent =
+                    data.select_language + ' ';
+
+                // Update continue button text
+                document.getElementById('btn-continue').textContent =
+                    data.continue + ' →';
+
+                // Update guide bubble
+                document.getElementById('guide-bubble').textContent =
+                    data.selected + ' ✓';
+
+                // Make character talk
+                var fig = document.getElementById('guide-figure');
+                fig.classList.add('talking');
+
+                // Speak CONFIRMATION in chosen language (not the question again)
+                // Use lang_fallback if defined (for languages Windows can't speak natively)
+                var speechLang   = data.lang_fallback   || data.lang_code;
+                var spokenName   = data.lang_name_spoken || data.lang_name;
+                var spokenSelect = data.selected_spoken  || data.selected;
+                var confirmText  = spokenName + ' ' + spokenSelect;
+                speak(confirmText, speechLang, function() {
+                    fig.classList.remove('talking');
+                });
+
+                // Show continue button
+                document.getElementById('btn-continue').style.display = 'inline-block';
+
+                // Save to storage
+                localStorage.setItem('as_language', code);
+                localStorage.setItem('as_lang_code', data.lang_code);
+            });
+    }
+
+    function goNext() {
+        if (!selectedLang) return;
+        window.location.href = 'voice-or-type.html';
+    }
+</script>
+
+</body>
+</html>

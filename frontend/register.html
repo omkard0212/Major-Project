@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>ArthSathi | खाता बनाएं</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/character.css">
+    <style>
+        .auth-box {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .tab-row {
+            display: flex;
+            border-radius: 50px;
+            background: #E8F5E9;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 50px;
+            background: transparent;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-mid);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Each field group */
+        .form-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-mid);
+            display: block;
+            margin-bottom: 6px;
+            transition: color 0.2s;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #C8E6C9;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #FAFAFA;
+            color: var(--text-dark);
+        }
+
+        /* Active/highlighted field */
+        .form-group.active .form-input {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(46,125,50,0.15);
+        }
+
+        .form-group.active .form-label {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        /* Inactive fields are dimmed */
+        .form-group.inactive .form-input {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .form-group.inactive .form-label {
+            opacity: 0.4;
+        }
+
+        /* Completed fields show green tick */
+        .form-group.done .form-input {
+            border-color: var(--primary-light);
+            background: #F1F8E9;
+        }
+
+        .form-group.done .form-label::after {
+            content: ' ✓';
+            color: var(--primary);
+        }
+
+        /* Animated arrow pointing to active field */
+        .field-arrow {
+            position: absolute;
+            right: -32px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 22px;
+            color: var(--accent);
+            animation: bounceRight 0.8s infinite;
+            display: none;
+        }
+
+        .form-group.active .field-arrow {
+            display: block;
+        }
+
+        @keyframes bounceRight {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            50%       { transform: translateY(-50%) translateX(-6px); }
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .input-row .form-input { flex: 1; }
+
+        .mic-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            width: 48px;
+            height: 48px;
+            font-size: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .mic-btn.listening {
+            background: #C62828;
+            animation: micPulse 0.8s infinite;
+        }
+
+        @keyframes micPulse {
+            0%, 100% { transform: scale(1); }
+            50%       { transform: scale(1.15); }
+        }
+
+        /* Next button below active field */
+        .next-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 32px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            display: none;
+            box-shadow: 0 3px 12px rgba(46,125,50,0.35);
+            transition: all 0.2s ease;
+        }
+
+        .next-btn.show { display: inline-block; }
+        .next-btn:hover { background: var(--primary-light); }
+
+        .error-msg {
+            color: #C62828;
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .error-msg.show { display: block; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(46,125,50,0.4);
+            transition: all 0.2s ease;
+            display: none;
+        }
+
+        .submit-btn.show { display: block; }
+        .submit-btn:hover { background: var(--primary-light); transform: translateY(-2px); }
+
+        .switch-link {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text-mid);
+        }
+
+        .switch-link span {
+            color: var(--primary);
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="screen" id="screen-auth">
+
+    <div class="app-header">
+        <div class="app-logo">Arth<span>Sathi</span></div>
+    </div>
+
+    <!-- Speech bubble — shows current instruction -->
+    <div class="speech-bubble" id="auth-bubble">
+        अपना नाम नीचे लिखें
+        <button class="speak-btn" onclick="speakCurrent()" title="सुनें">🔊</button>
+    </div>
+
+    <div class="auth-box">
+
+        <!-- Tabs -->
+        <div class="tab-row">
+            <button class="tab-btn active" id="tab-register" onclick="switchTab('register')">
+                नया खाता
+            </button>
+            <button class="tab-btn" id="tab-login" onclick="switchTab('login')">
+                लॉगिन
+            </button>
+        </div>
+
+        <!-- ══ REGISTER FORM ══ -->
+        <div id="form-register">
+
+            <!-- Step 1: Name -->
+            <div class="form-group active" id="grp-reg-name">
+                <label class="form-label" id="lbl-name">आपका नाम</label>
+                <div class="input-row">
+                    <input class="form-input" type="text" id="reg-name"
+                           placeholder="अपना नाम लिखें" autocomplete="name"
+                           oninput="onFieldInput('reg-name', 'next-reg-name')">
+                    <button class="mic-btn" id="mic-reg-name"
+                            onclick="startVoiceInput('reg-name', 'mic-reg-name', 'next-reg-name')">🎤</button>
+                </div>
+                <div class="field-arrow">←</div>
+                <button class="next-btn" id="next-reg-name"
+                        onclick="regStep(2)">आगे →</button>
+                <div class="error-msg" id="err-reg-name"></div>
+            </div>
+
+            <!-- Step 2: Phone -->
+            <div class="form-group inactive" id="grp-reg-phone">
+                <label class="form-label" id="lbl-phone">मोबाइल नंबर</label>
+                <div class="input-row">
+                    <input class="form-input" type="tel" id="reg-phone"
+                           placeholder="मोबाइल नंबर" maxlength="10" autocomplete="tel"
+                           oninput="onFieldInput('reg-phone', 'next-reg-phone')">
+                    <button class="mic-btn" id="mic-reg-phone"
+                            onclick="startVoiceInput('reg-phone', 'mic-reg-phone', 'next-reg-phone')">🎤</button>
+                </div>
+                <div class="field-arrow">←</div>
+                <button class="next-btn" id="next-reg-phone"
+                        onclick="regStep(3)">आगे →</button>
+                <div class="error-msg" id="err-reg-phone"></div>
+            </div>
+
+            <!-- Step 3: Password -->
+            <div class="form-group inactive" id="grp-reg-password">
+                <label class="form-label" id="lbl-password">पासवर्ड बनाएं</label>
+                <input class="form-input" type="password" id="reg-password"
+                       placeholder="पासवर्ड" autocomplete="new-password"
+                       oninput="onFieldInput('reg-password', 'btn-reg-submit')">
+                <div class="field-arrow">←</div>
+                <div class="error-msg" id="err-reg-password"></div>
+            </div>
+
+            <div class="error-msg" id="reg-error"></div>
+
+            <button class="submit-btn" id="btn-reg-submit" onclick="doRegister()">
+                <span id="reg-btn-text">खाता बनाएं</span>
+                <div class="spinner" id="reg-spinner"></div>
+            </button>
+
+            <div class="switch-link">
+                <span id="switch-to-login" onclick="switchTab('login')">
+                    पहले से खाता है? लॉगिन करें
+                </span>
+            </div>
+
+        </div>
+
+        <!-- ══ LOGIN FORM ══ -->
+        <div id="form-login" style="display:none;">
+
+            <!-- Step 1: Phone -->
+            <div class="form-group active" id="grp-login-phone">
+                <label class="form-label" id="lbl-phone-login">मोबाइल नंबर</label>
+                <div class="input-row">
+                    <input class="form-input" type="tel" id="login-phone"
+                           placeholder="मोबाइल नंबर" maxlength="10" autocomplete="tel"
+                           oninput="onFieldInput('login-phone', 'next-login-phone')">
+                    <button class="mic-btn" id="mic-login-phone"
+                            onclick="startVoiceInput('login-phone', 'mic-login-phone', 'next-login-phone')">🎤</button>
+                </div>
+                <div class="field-arrow">←</div>
+                <button class="next-btn" id="next-login-phone"
+                        onclick="loginStep(2)">आगे →</button>
+                <div class="error-msg" id="err-login-phone"></div>
+            </div>
+
+            <!-- Step 2: Password -->
+            <div class="form-group inactive" id="grp-login-password">
+                <label class="form-label" id="lbl-password-login">पासवर्ड</label>
+                <input class="form-input" type="password" id="login-password"
+                       placeholder="पासवर्ड" autocomplete="current-password"
+                       oninput="onFieldInput('login-password', 'btn-login-submit')">
+                <div class="field-arrow">←</div>
+                <div class="error-msg" id="err-login-password"></div>
+            </div>
+
+            <div class="error-msg" id="login-error"></div>
+
+            <button class="submit-btn" id="btn-login-submit" onclick="doLogin()">
+                <span id="login-btn-text">लॉगिन करें</span>
+                <div class="spinner" id="login-spinner"></div>
+            </button>
+
+            <div class="switch-link">
+                <span id="switch-to-register" onclick="switchTab('register')">
+                    नया खाता बनाएं
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="progress-dots" style="margin-top:20px;">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+</div>
+
+<!-- Fixed character guide -->
+<div class="character-guide" id="char-guide">
+    <div class="speech-bubble-guide" id="guide-bubble">अपना नाम लिखें 👆</div>
+    <div class="character-figure" id="guide-figure"></div>
+</div>
+
+<script src="js/speech.js"></script>
+<script src="js/app.js"></script>
+<script>
+    var L          = {};
+    // Map 'type' → 'text' to match database constraint (voice/text)
+    var rawMode   = localStorage.getItem('as_input_mode') || 'type';
+    var inputMode = (rawMode === 'type') ? 'text' : 'voice';
+    var currentTab = 'register';
+
+    // Step instructions — filled after language loads
+    var REG_STEPS  = [];
+    var LOGIN_STEPS = [];
+
+    window.addEventListener('load', function() {
+        buildCharacter();
+        loadLanguage();
+    });
+
+    function loadLanguage() {
+        var langCode = localStorage.getItem('as_language') || 'hi';
+        fetch('lang/' + langCode + '.json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                L = data;
+                applyLanguage();
+                buildSteps();
+
+                // Speak first instruction after short delay
+                setTimeout(function() {
+                    guideStep('register', 1);
+                }, 600);
+            });
+    }
+
+    function buildSteps() {
+        // Register: 3 steps
+        REG_STEPS = [
+            { speak: L.enter_name_speak  || L.enter_name,  bubble: L.enter_name,  guide: L.enter_name },
+            { speak: L.enter_phone_speak || L.enter_phone, bubble: L.enter_phone, guide: L.enter_phone },
+            { speak: L.enter_password_speak || L.enter_password, bubble: L.enter_password, guide: L.enter_password }
+        ];
+        // Login: 2 steps
+        LOGIN_STEPS = [
+            { speak: L.enter_phone_speak || L.enter_phone,    bubble: L.enter_phone,    guide: L.enter_phone },
+            { speak: L.enter_password_speak || L.enter_password, bubble: L.enter_password, guide: L.enter_password }
+        ];
+    }
+
+    function applyLanguage() {
+        // Tabs
+        document.getElementById('tab-register').textContent = L.register;
+        document.getElementById('tab-login').textContent    = L.login;
+
+        // Register labels & placeholders
+        document.getElementById('lbl-name').textContent          = L.enter_name;
+        document.getElementById('lbl-phone').textContent         = L.enter_phone;
+        document.getElementById('lbl-password').textContent      = L.enter_password;
+        document.getElementById('reg-name').placeholder          = L.name_placeholder;
+        document.getElementById('reg-phone').placeholder         = L.phone_placeholder;
+        document.getElementById('reg-password').placeholder      = L.password_placeholder;
+        document.getElementById('reg-btn-text').textContent      = L.register_btn;
+        document.getElementById('switch-to-login').textContent   = L.already_have;
+
+        // Login labels & placeholders
+        document.getElementById('lbl-phone-login').textContent    = L.enter_phone;
+        document.getElementById('lbl-password-login').textContent = L.enter_password;
+        document.getElementById('login-phone').placeholder        = L.phone_placeholder;
+        document.getElementById('login-password').placeholder     = L.password_placeholder;
+        document.getElementById('login-btn-text').textContent     = L.login_btn;
+        document.getElementById('switch-to-register').textContent = L.no_account;
+
+        // Next button text
+        var nextText = L.continue || 'आगे →';
+        document.querySelectorAll('.next-btn').forEach(function(b) {
+            b.textContent = nextText + ' →';
+        });
+
+        // Hide mic buttons in type mode
+        if (inputMode === 'type') {
+            document.querySelectorAll('.mic-btn').forEach(function(b) {
+                b.style.display = 'none';
+            });
+        }
+    }
+
+    // ── Guide a step: update bubble, speak, highlight field ──
+    function guideStep(tab, step) {
+        var steps = tab === 'register' ? REG_STEPS : LOGIN_STEPS;
+        if (!steps.length) return;
+
+        var s = steps[step - 1];
+        if (!s) return;
+
+        // Update speech bubble
+        document.getElementById('auth-bubble').childNodes[0].textContent = s.bubble + ' ';
+        document.getElementById('guide-bubble').textContent = s.guide + ' 👇';
+
+        // Speak instruction
+        var speechLang = L.lang_fallback || L.lang_code;
+        var fig = document.getElementById('guide-figure');
+        fig.classList.add('talking');
+        speak(s.speak, speechLang, function() {
+            fig.classList.remove('talking');
+        });
+    }
+
+    function speakCurrent() {
+        var steps = currentTab === 'register' ? REG_STEPS : LOGIN_STEPS;
+        var bubble = document.getElementById('auth-bubble').childNodes[0].textContent;
+        speak(bubble, L.lang_fallback || L.lang_code);
+    }
+
+    // ── When user types in a field — show the next/submit btn ─
+    function onFieldInput(fieldId, nextBtnId) {
+        var val = document.getElementById(fieldId).value.trim();
+        var btn = document.getElementById(nextBtnId);
+        if (!btn) return;
+        if (val.length > 0) {
+            btn.classList.add('show');
+        } else {
+            btn.classList.remove('show');
+        }
+    }
+
+    // ── Register step navigation ──────────────────────────────
+    function regStep(step) {
+        // Validate previous step before moving
+        if (step === 2) {
+            var name = document.getElementById('reg-name').value.trim();
+            if (!name) {
+                showError('err-reg-name', L.error_fill_all);
+                return;
+            }
+            clearError('err-reg-name');
+            setDone('grp-reg-name');
+            setActive('grp-reg-phone');
+            document.getElementById('reg-phone').focus();
+            guideStep('register', 2);
+        }
+
+        if (step === 3) {
+            var phone = document.getElementById('reg-phone').value.trim();
+            if (phone.length !== 10 || isNaN(phone)) {
+                showError('err-reg-phone', L.error_phone);
+                speak(L.error_phone, L.lang_fallback || L.lang_code);
+                return;
+            }
+            clearError('err-reg-phone');
+            setDone('grp-reg-phone');
+            setActive('grp-reg-password');
+            document.getElementById('reg-password').focus();
+            guideStep('register', 3);
+        }
+    }
+
+    // ── Login step navigation ─────────────────────────────────
+    function loginStep(step) {
+        if (step === 2) {
+            var phone = document.getElementById('login-phone').value.trim();
+            if (phone.length !== 10 || isNaN(phone)) {
+                showError('err-login-phone', L.error_phone);
+                speak(L.error_phone, L.lang_fallback || L.lang_code);
+                return;
+            }
+            clearError('err-login-phone');
+            setDone('grp-login-phone');
+            setActive('grp-login-password');
+            document.getElementById('login-password').focus();
+            guideStep('login', 2);
+        }
+    }
+
+    // ── Field state helpers ───────────────────────────────────
+    function setActive(grpId) {
+        var grp = document.getElementById(grpId);
+        grp.classList.remove('inactive', 'done');
+        grp.classList.add('active');
+    }
+
+    function setDone(grpId) {
+        var grp = document.getElementById(grpId);
+        grp.classList.remove('active', 'inactive');
+        grp.classList.add('done');
+    }
+
+    function setInactive(grpId) {
+        var grp = document.getElementById(grpId);
+        grp.classList.remove('active', 'done');
+        grp.classList.add('inactive');
+    }
+
+    // ── Tab switching ─────────────────────────────────────────
+    function switchTab(tab) {
+        currentTab = tab;
+        if (tab === 'register') {
+            document.getElementById('form-register').style.display = 'block';
+            document.getElementById('form-login').style.display    = 'none';
+            document.getElementById('tab-register').classList.add('active');
+            document.getElementById('tab-login').classList.remove('active');
+            // Reset register form to step 1
+            resetRegister();
+            setTimeout(function() { guideStep('register', 1); }, 300);
+        } else {
+            document.getElementById('form-register').style.display = 'none';
+            document.getElementById('form-login').style.display    = 'block';
+            document.getElementById('tab-login').classList.add('active');
+            document.getElementById('tab-register').classList.remove('active');
+            resetLogin();
+            setTimeout(function() { guideStep('login', 1); }, 300);
+        }
+    }
+
+    function resetRegister() {
+        setActive('grp-reg-name');
+        setInactive('grp-reg-phone');
+        setInactive('grp-reg-password');
+        document.getElementById('btn-reg-submit').classList.remove('show');
+        document.getElementById('next-reg-name').classList.remove('show');
+        document.getElementById('next-reg-phone').classList.remove('show');
+        document.getElementById('reg-name').value     = '';
+        document.getElementById('reg-phone').value    = '';
+        document.getElementById('reg-password').value = '';
+    }
+
+    function resetLogin() {
+        setActive('grp-login-phone');
+        setInactive('grp-login-password');
+        document.getElementById('btn-login-submit').classList.remove('show');
+        document.getElementById('next-login-phone').classList.remove('show');
+        document.getElementById('login-phone').value    = '';
+        document.getElementById('login-password').value = '';
+    }
+
+    // ── Submit register ───────────────────────────────────────
+    function doRegister() {
+        var name     = document.getElementById('reg-name').value.trim();
+        var phone    = document.getElementById('reg-phone').value.trim();
+        var password = document.getElementById('reg-password').value.trim();
+
+        if (!password || password.length < 4) {
+            showError('err-reg-password', L.error_password);
+            speak(L.error_password, L.lang_fallback || L.lang_code);
+            return;
+        }
+
+        setLoading('reg', true);
+
+        apiCall('/auth/register', 'POST', {
+            name: name, phone: phone, password: password,
+            preferred_language: localStorage.getItem('as_language') || 'hi',
+            input_mode: inputMode
+        }, function(data) {
+            setLoading('reg', false);
+            localStorage.setItem('as_user_id',   data.user.user_id);
+            localStorage.setItem('as_user_name', data.user.name);
+            speak(L.account_created, L.lang_fallback || L.lang_code, function() {
+                window.location.href = 'onboarding.html';
+            });
+        }, function(msg) {
+            setLoading('reg', false);
+            var errMsg = (msg && msg.toLowerCase().includes('already'))
+                ? L.error_exists : L.error_fill_all;
+            showError('reg-error', errMsg);
+            speak(errMsg, L.lang_fallback || L.lang_code);
+        });
+    }
+
+    // ── Submit login ──────────────────────────────────────────
+    function doLogin() {
+        var phone    = document.getElementById('login-phone').value.trim();
+        var password = document.getElementById('login-password').value.trim();
+
+        if (!password || password.length < 4) {
+            showError('err-login-password', L.error_password);
+            speak(L.error_password, L.lang_fallback || L.lang_code);
+            return;
+        }
+
+        setLoading('login', true);
+
+        apiCall('/auth/login', 'POST', { phone: phone, password: password },
+        function(data) {
+            setLoading('login', false);
+            localStorage.setItem('as_user_id',   data.user.user_id);
+            localStorage.setItem('as_user_name', data.user.name);
+            speak(L.welcome_back, L.lang_fallback || L.lang_code, function() {
+                window.location.href = 'onboarding.html';
+            });
+        }, function() {
+            setLoading('login', false);
+            showError('login-error', L.error_wrong);
+            speak(L.error_wrong, L.lang_fallback || L.lang_code);
+        });
+    }
+
+    // ── Helpers ───────────────────────────────────────────────
+    function showError(id, msg) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = msg || '';
+        el.classList.add('show');
+    }
+
+    function clearError(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = '';
+        el.classList.remove('show');
+    }
+
+    function setLoading(form, on) {
+        var btnText = document.getElementById(form + '-btn-text');
+        var spinner = document.getElementById(form + '-spinner');
+        if (btnText) btnText.style.display = on ? 'none'  : 'inline';
+        if (spinner) spinner.style.display  = on ? 'block' : 'none';
+    }
+
+    // ── Voice input ───────────────────────────────────────────
+    function startVoiceInput(fieldId, btnId, nextBtnId) {
+        if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+            alert('Voice input not supported in this browser.');
+            return;
+        }
+        var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        var rec = new SR();
+        rec.lang = localStorage.getItem('as_lang_code') || 'hi-IN';
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+
+        var btn = document.getElementById(btnId);
+        btn.classList.add('listening');
+
+        rec.onresult = function(e) {
+            document.getElementById(fieldId).value = e.results[0][0].transcript;
+            btn.classList.remove('listening');
+            onFieldInput(fieldId, nextBtnId);
+        };
+        rec.onerror = rec.onend = function() {
+            btn.classList.remove('listening');
+        };
+        rec.start();
+    }
+
+    // ── Build character ───────────────────────────────────────
+    function buildCharacter() {
+        var name = localStorage.getItem('character') || 'arth';
+        var fig  = document.getElementById('guide-figure');
+        if (name === 'arth') {
+            fig.innerHTML =
+                '<div class="char-hair-male"></div>' +
+                '<div class="char-head"><div class="char-eyes">' +
+                '<div class="char-eye"></div><div class="char-eye"></div>' +
+                '</div><div class="char-mouth"></div></div>' +
+                '<div class="char-neck"></div>' +
+                '<div class="char-body char-body-male"></div>' +
+                '<div class="char-arm char-arm-left arth"></div>' +
+                '<div class="char-arm char-arm-right arth"></div>' +
+                '<div class="char-leg char-leg-left arth"></div>' +
+                '<div class="char-leg char-leg-right arth"></div>' +
+                '<div class="char-shoe char-shoe-left"></div>' +
+                '<div class="char-shoe char-shoe-right"></div>';
+            fig.className = 'character-figure arth';
+        } else {
+            fig.innerHTML =
+                '<div class="char-hair-female"></div>' +
+                '<div class="char-head"><div class="char-eyes">' +
+                '<div class="char-eye"></div><div class="char-eye"></div>' +
+                '</div><div class="char-mouth"></div></div>' +
+                '<div class="char-neck"></div>' +
+                '<div class="char-body char-body-female"></div>' +
+                '<div class="char-arm char-arm-left sathi"></div>' +
+                '<div class="char-arm char-arm-right sathi"></div>' +
+                '<div class="char-leg char-leg-left sathi"></div>' +
+                '<div class="char-leg char-leg-right sathi"></div>';
+            fig.className = 'character-figure sathi';
+        }
+    }
+</script>
+
+</body>
+</html>

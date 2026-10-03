@@ -1,0 +1,50 @@
+[
+  {
+    "timestamp": "2026-09-30T13:01:13.011247",
+    "action": "select",
+    "action_weight": 3,
+    "scheme_slug": "sre-randr",
+    "scheme_name": "Security Related Expenditure (Relief and Rehabilitation)",
+    "score_given": 55,
+    "user": {
+      "age": null,
+      "annual_income": null,
+      "gender": null,
+      "caste": null,
+      "state": null,
+      "occupation": null
+    }
+  },
+  {
+    "timestamp": "2026-09-30T13:01:13.903102",
+    "action": "select",
+    "action_weight": 3,
+    "scheme_slug": "sre-randr",
+    "scheme_name": "Security Related Expenditure (Relief and Rehabilitation)",
+    "score_given": 55,
+    "user": {
+      "age": null,
+      "annual_income": null,
+      "gender": null,
+      "caste": null,
+      "state": null,
+      "occupation": null
+    }
+  },
+  {
+    "timestamp": "2026-09-30T13:01:15.565079",
+    "action": "select",
+    "action_weight": 3,
+    "scheme_slug": "sre-randr",
+    "scheme_name": "Security Related Expenditure (Relief and Rehabilitation)",
+    "score_given": 55,
+    "user": {
+      "age": null,
+      "annual_income": null,
+      "gender": null,
+      "caste": null,
+      "state": null,
+      "occupation": null
+    }
+  }
+]

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>ArthSathi | आपकी जानकारी</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/character.css">
+    <style>
+        .onboarding-box {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: var(--card-shadow);
+            min-height: 200px;
+        }
+
+        /* Step indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .step-count {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .step-bar {
+            flex: 1;
+            height: 6px;
+            background: #C8E6C9;
+            border-radius: 3px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+
+        .step-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        /* Question title */
+        .question-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        /* Arrow pointing down to input */
+        .input-arrow {
+            text-align: center;
+            font-size: 26px;
+            color: var(--accent);
+            animation: bounceArrow 0.9s infinite;
+            margin-bottom: 6px;
+        }
+
+        /* Number input */
+        .num-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #C8E6C9;
+            border-radius: var(--radius-sm);
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            color: var(--text-dark);
+            background: #FAFAFA;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .num-input:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(46,125,50,0.12);
+        }
+
+        /* Text input */
+        .text-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #C8E6C9;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            outline: none;
+            color: var(--text-dark);
+            background: #FAFAFA;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .text-input:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(46,125,50,0.12);
+        }
+
+        /* Select dropdown */
+        .select-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #C8E6C9;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            outline: none;
+            color: var(--text-dark);
+            background: white;
+            font-family: inherit;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%232E7D32' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+
+        /* Choice buttons grid (gender, caste, occupation) */
+        .choices-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .choices-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+        .choices-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+        .choice-btn {
+            background: #F1F8E9;
+            border: 2px solid #C8E6C9;
+            border-radius: var(--radius-sm);
+            padding: 14px 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .choice-btn:hover {
+            border-color: var(--primary-light);
+            background: #E8F5E9;
+        }
+
+        .choice-btn.selected {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .choice-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Mic + input row */
+        .input-with-mic {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .input-with-mic .text-input,
+        .input-with-mic .num-input { flex: 1; }
+
+        .mic-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            width: 48px;
+            height: 48px;
+            font-size: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .mic-btn.listening {
+            background: #C62828;
+            animation: micPulse 0.7s infinite;
+        }
+
+        @keyframes micPulse {
+            0%, 100% { transform: scale(1); }
+            50%       { transform: scale(1.12); }
+        }
+
+        /* Next button */
+        .next-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 16px;
+            box-shadow: 0 4px 14px rgba(46,125,50,0.35);
+            transition: all 0.2s;
+            display: none;
+        }
+
+        .next-btn.show { display: block; }
+        .next-btn:hover { background: var(--primary-light); }
+
+        /* Yes / No buttons */
+        .yn-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .yn-btn {
+            flex: 1;
+            padding: 18px;
+            border: 2px solid #C8E6C9;
+            border-radius: var(--radius);
+            background: #F1F8E9;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .yn-btn:hover { border-color: var(--primary-light); }
+        .yn-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .error-msg {
+            color: #C62828;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+        .error-msg.show { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="screen" id="screen-onboarding" style="padding-bottom:160px;">
+
+    <div class="app-header">
+        <div class="app-logo">Arth<span>Sathi</span></div>
+    </div>
+
+    <!-- Speech bubble -->
+    <div class="speech-bubble" id="ob-bubble">
+        अब हम आपके बारे में जानेंगे
+        <button class="speak-btn" onclick="speakCurrent()" title="सुनें">🔊</button>
+    </div>
+
+    <!-- Onboarding box — content changes per step -->
+    <div class="onboarding-box" id="ob-box">
+
+        <div class="step-indicator">
+            <span class="step-count" id="step-count">1 / 8</span>
+            <div class="step-bar">
+                <div class="step-bar-fill" id="step-fill" style="width:12%;"></div>
+            </div>
+        </div>
+
+        <div class="question-title" id="q-title">आपकी उम्र क्या है?</div>
+
+        <!-- Step content injected here by JS -->
+        <div id="step-content"></div>
+
+        <div class="error-msg" id="ob-error"></div>
+
+        <button class="next-btn" id="next-btn" onclick="nextStep()">आगे →</button>
+
+    </div>
+
+    <!-- Progress dots — step 5 of 7 -->
+    <div class="progress-dots" style="margin-top:20px;">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+</div>
+
+<!-- Fixed character guide -->
+<div class="character-guide" id="char-guide">
+    <div class="speech-bubble-guide" id="guide-bubble">अपनी जानकारी दें 👆</div>
+    <div class="character-figure" id="guide-figure"></div>
+</div>
+
+<script src="js/speech.js"></script>
+<script src="js/app.js"></script>
+<script>
+    var L          = {};
+    var currentStep = 1;
+    var totalSteps  = 8;
+    var inputMode   = localStorage.getItem('as_input_mode') || 'text';
+    var answers     = {};   // collected answers
+
+    // Indian states list for dropdown
+    var STATES = [
+        'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh',
+        'Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka',
+        'Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram',
+        'Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana',
+        'Tripura','Uttar Pradesh','Uttarakhand','West Bengal','Delhi',
+        'Jammu And Kashmir','Ladakh','Puducherry','Chandigarh','Lakshadweep',
+        'Andaman And Nicobar','Dadra And Nagar Haveli'
+    ];
+
+    window.addEventListener('load', function() {
+        buildCharacter();
+        loadLanguage();
+    });
+
+    function loadLanguage() {
+        var langCode = localStorage.getItem('as_language') || 'hi';
+        fetch('lang/' + langCode + '.json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                L = data;
+                document.getElementById('guide-bubble').textContent =
+                    (L.onboarding_intro || 'अपनी जानकारी दें') + ' 👆';
+                setTimeout(function() {
+                    var speechLang = L.lang_fallback || L.lang_code;
+                    speak(L.onboarding_intro_speak || L.onboarding_intro, speechLang, function() {
+                        renderStep(1);
+                    });
+                }, 600);
+            });
+    }
+
+    // ── RENDER STEP ───────────────────────────────────────────
+    function renderStep(step) {
+        currentStep = step;
+        var pct = Math.round((step / totalSteps) * 100);
+        document.getElementById('step-count').textContent = step + ' / ' + totalSteps;
+        document.getElementById('step-fill').style.width  = pct + '%';
+        document.getElementById('ob-error').classList.remove('show');
+        document.getElementById('next-btn').classList.remove('show');
+
+        var content = document.getElementById('step-content');
+        var speechLang = L.lang_fallback || L.lang_code;
+        var showMic = (inputMode === 'voice');
+
+        switch (step) {
+
+            // ── Step 1: Age ────────────────────────────────────
+            case 1:
+                setTitle(L.q_age || 'आपकी उम्र क्या है?');
+                content.innerHTML =
+                    '<div class="input-arrow">↓</div>' +
+                    '<div class="input-with-mic">' +
+                    '<input class="num-input" type="number" id="inp-age" min="1" max="100" ' +
+                    'placeholder="' + (L.age_placeholder || '18') + '" ' +
+                    'oninput="onNumInput(this, \'next-btn\')">' +
+                    (showMic ? '<button class="mic-btn" id="mic-age" onclick="voiceInput(\'inp-age\',\'mic-age\',\'next-btn\')">🎤</button>' : '') +
+                    '</div>';
+                speak(L.q_age_speak || L.q_age, speechLang);
+                setTimeout(function() { var el = document.getElementById('inp-age'); if(el) el.focus(); }, 400);
+                break;
+
+            // ── Step 2: Gender ─────────────────────────────────
+            case 2:
+                setTitle(L.q_gender || 'आप कौन हैं?');
+                content.innerHTML =
+                    '<div class="input-arrow">↓</div>' +
+                    '<div class="choices-grid cols-3">' +
+                    choiceBtn('male',   '👨', L.male   || 'पुरुष') +
+                    choiceBtn('female', '👩', L.female || 'महिला') +
+                    choiceBtn('other',  '🧑', L.other  || 'अन्य') +
+                    '</div>';
+                speak(L.q_gender_speak || L.q_gender, speechLang);
+                break;
+
+            // ── Step 3: State ──────────────────────────────────
+            case 3:
+                setTitle(L.q_state || 'आप किस राज्य में रहते हैं?');
+                var opts = '<option value="">' + (L.state_placeholder || 'राज्य चुनें') + '</option>';
+                STATES.forEach(function(s) { opts += '<option value="' + s + '">' + s + '</option>'; });
+                content.innerHTML =
+                    '<div class="input-arrow">↓</div>' +
+                    '<select class="select-input" id="inp-state" onchange="onSelectInput(this, \'next-btn\')">' +
+                    opts + '</select>';
+                speak(L.q_state_speak || L.q_state, speechLang);
+                // Pre-select if already answered
+                if (answers.state) {
+                    setTimeout(function() {
+                        var el = document.getElementById('inp-state');
+                        if (el) { el.value = answers.state; showNextBtn(); }
+                    }, 100);
+                }
+                break;
+
+            // ── Step 4: District ───────────────────────────────
+            case 4:
+                setTitle(L.q_district || 'आपका जिला कौन सा है?');
+                content.innerHTML =
+                    '<div class="input-arrow">↓</div>' +
+                    '<div class="input-with-mic">' +
+                    '<input class="text-input" type="text" id="inp-district" ' +
+                    'placeholder="' + (L.district_placeholder || 'जिले का नाम') + '" ' +
+                    'oninput="onTextInput(this, \'next-btn\')">' +
+                    (showMic ? '<button class="mic-btn" id="mic-district" onclick="voiceInput(\'inp-district\',\'mic-district\',\'next-btn\')">🎤</button>' : '') +
+                    '</div>';
+                speak(L.q_district_speak || L.q_district, speechLang);
+                setTimeout(function() { var el = document.getElementById('inp-district'); if(el) el.focus(); }, 400);
+                break;
+
+            // ── Step 5: Caste ──────────────────────────────────
+            case 5:
+                setTitle(L.q_caste || 'आप किस वर्ग से हैं?');
+                content.innerHTML =
+                    '<div class="input-arrow">↓</div>' +
+                    '<div class="choices-grid cols-2">' +
+                    choiceBtn('SC',      '📋', L.sc      || 'SC') +
+                    choiceBtn('ST',      '🏕️', L.st      || 'ST') +
+                    choiceBtn('OBC',     '📄', L.obc     || 'OBC') +
+                    choiceBtn('General', '👤', L.general || 'General') +
+                    '</div>';
+                speak(L.q_caste_speak || L.q_caste, speechLang);
+                break;
+
+            // ── Step 6: Occupation ─────────────────────────────
+            case 6:
+                setTitle(L.q_occupation || 'आप क्या काम करते हैं?');
+                content.innerHTML =
+                    '<div class="input-arrow">↓</div>' +
+                    '<div class="choices-grid cols-2">' +
+                    choiceBtn('farmer',             '🌾', L.farmer             || 'किसान') +
+                    choiceBtn('student',            '📚', L.student            || 'विद्यार्थी') +
+                    choiceBtn('entrepreneur',       '💼', L.entrepreneur       || 'व्यापारी') +
+                    choiceBtn('construction_worker','🔨', L.construction_worker|| 'मजदूर') +
+                    choiceBtn('artisan',            '🎨', L.artisan            || 'कारीगर') +
+                    choiceBtn('daily_wage',         '⚒️', L.daily_wage         || 'दैनिक मजदूर') +
+                    '</div>';
+                speak(L.q_occupation_speak || L.q_occupation, speechLang);
+                break;
+
+            // ── Step 7: Income ─────────────────────────────────
+            case 7:
+                setTitle(L.q_income || 'आपकी सालाना आमदनी कितनी है?');
+                content.innerHTML =
+                    '<div class="input-arrow">↓</div>' +
+                    '<div class="input-with-mic">' +
+                    '<input class="num-input" type="number" id="inp-income" min="0" ' +
+                    'placeholder="' + (L.income_placeholder || '₹ सालाना') + '" ' +
+                    'oninput="onNumInput(this, \'next-btn\')">' +
+                    (showMic ? '<button class="mic-btn" id="mic-income" onclick="voiceInput(\'inp-income\',\'mic-income\',\'next-btn\')">🎤</button>' : '') +
+                    '</div>';
+                speak(L.q_income_speak || L.q_income, speechLang);
+                setTimeout(function() { var el = document.getElementById('inp-income'); if(el) el.focus(); }, 400);
+                break;
+
+            // ── Step 8: Family size ────────────────────────────
+            case 8:
+                setTitle(L.q_family || 'आपके परिवार में कितने लोग हैं?');
+                content.innerHTML =
+                    '<div class="input-arrow">↓</div>' +
+                    '<div class="input-with-mic">' +
+                    '<input class="num-input" type="number" id="inp-family" min="1" max="20" ' +
+                    'placeholder="' + (L.family_placeholder || '4') + '" ' +
+                    'oninput="onNumInput(this, \'next-btn\')">' +
+                    (showMic ? '<button class="mic-btn" id="mic-family" onclick="voiceInput(\'inp-family\',\'mic-family\',\'next-btn\')">🎤</button>' : '') +
+                    '</div>';
+                speak(L.q_family_speak || L.q_family, speechLang);
+                setTimeout(function() { var el = document.getElementById('inp-family'); if(el) el.focus(); }, 400);
+                break;
+        }
+
+        // Update next button text
+        var nxtBtn = document.getElementById('next-btn');
+        nxtBtn.textContent = (step < totalSteps)
+            ? (L.continue || 'आगे') + ' →'
+            : (L.saved    || 'सहेजें') + ' ✓';
+
+        // Update guide bubble
+        document.getElementById('guide-bubble').textContent =
+            (L['q_age'] && step === 1 ? L.q_age :
+             L['q_gender'] && step === 2 ? L.q_gender :
+             '...') + ' 👇';
+    }
+
+    // ── NEXT STEP ─────────────────────────────────────────────
+    function nextStep() {
+        var speechLang = L.lang_fallback || L.lang_code;
+
+        // Validate and collect answer
+        switch (currentStep) {
+            case 1:
+                var age = document.getElementById('inp-age').value;
+                if (!age || age < 1 || age > 100) {
+                    showErr(L.error_fill_all || 'कृपया सही उम्र भरें।');
+                    return;
+                }
+                answers.age = parseInt(age);
+                break;
+
+            case 2:
+                if (!answers.gender) {
+                    showErr(L.error_fill_all || 'कृपया विकल्प चुनें।');
+                    return;
+                }
+                break;
+
+            case 3:
+                var state = document.getElementById('inp-state').value;
+                if (!state) {
+                    showErr(L.error_fill_all || 'कृपया राज्य चुनें।');
+                    return;
+                }
+                answers.state = state;
+                break;
+
+            case 4:
+                var district = document.getElementById('inp-district').value.trim();
+                if (!district) {
+                    showErr(L.error_fill_all || 'कृपया जिला भरें।');
+                    return;
+                }
+                answers.district = district;
+                break;
+
+            case 5:
+                if (!answers.caste) {
+                    showErr(L.error_fill_all || 'कृपया वर्ग चुनें।');
+                    return;
+                }
+                break;
+
+            case 6:
+                if (!answers.occupation) {
+                    showErr(L.error_fill_all || 'कृपया काम चुनें।');
+                    return;
+                }
+                break;
+
+            case 7:
+                var income = document.getElementById('inp-income').value;
+                if (!income || income < 0) {
+                    showErr(L.error_fill_all || 'कृपया आमदनी भरें।');
+                    return;
+                }
+                answers.annual_income = parseInt(income);
+                break;
+
+            case 8:
+                var family = document.getElementById('inp-family').value;
+                if (!family || family < 1) {
+                    showErr(L.error_fill_all || 'कृपया परिवार की संख्या भरें।');
+                    return;
+                }
+                answers.family_size = parseInt(family);
+                // Last step — save to database
+                saveProfile();
+                return;
+        }
+
+        // Character nod + move to next step
+        var fig = document.getElementById('guide-figure');
+        fig.classList.add('nodding');
+        setTimeout(function() {
+            fig.classList.remove('nodding');
+            renderStep(currentStep + 1);
+        }, 600);
+    }
+
+    // ── SAVE PROFILE ──────────────────────────────────────────
+    function saveProfile() {
+        var userId = localStorage.getItem('as_user_id');
+        if (!userId) {
+            window.location.href = 'register.html';
+            return;
+        }
+
+        var speechLang = L.lang_fallback || L.lang_code;
+
+        // Update bubble
+        document.getElementById('ob-bubble').childNodes[0].textContent =
+            (L.saving || 'सहेजा जा रहा है...') + ' ';
+        speak(L.saving || 'जानकारी सहेजी जा रही है।', speechLang);
+
+        var payload = {
+            user_id      : parseInt(userId),
+            age          : answers.age,
+            gender       : answers.gender,
+            state        : answers.state,
+            district     : answers.district,
+            caste        : answers.caste,
+            occupation   : answers.occupation,
+            annual_income: answers.annual_income,
+            family_size  : answers.family_size,
+            has_bank_account: false,
+            is_bpl       : false,
+            is_pwd       : false,
+            is_widow     : false,
+            goals        : []
+        };
+
+        apiCall('/profile/save', 'POST', payload,
+        function() {
+            document.getElementById('ob-bubble').childNodes[0].textContent =
+                (L.saved || 'जानकारी सहेज ली गई!') + ' ';
+            var fig = document.getElementById('guide-figure');
+            fig.classList.add('nodding');
+            speak(L.saved_speak || L.saved, speechLang, function() {
+                window.location.href = 'goals.html';
+            });
+        },
+        function(msg) {
+            showErr(msg || 'Error saving profile.');
+        });
+    }
+
+    // ── Choice button helper ──────────────────────────────────
+    function choiceBtn(value, icon, label) {
+        return '<button class="choice-btn" onclick="selectChoice(\'' + value + '\', this)">' +
+               '<span class="choice-icon">' + icon + '</span>' + label + '</button>';
+    }
+
+    function selectChoice(value, el) {
+        // Determine which step this is for
+        if (currentStep === 2) answers.gender     = value;
+        if (currentStep === 5) answers.caste      = value;
+        if (currentStep === 6) answers.occupation = value;
+
+        // Highlight selection
+        var parent = el.parentElement;
+        parent.querySelectorAll('.choice-btn').forEach(function(b) {
+            b.classList.remove('selected');
+        });
+        el.classList.add('selected');
+
+        // Auto-advance after short delay
+        setTimeout(function() { showNextBtn(); }, 200);
+    }
+
+    // ── Input helpers ─────────────────────────────────────────
+    function setTitle(text) {
+        document.getElementById('q-title').textContent = text;
+        document.getElementById('ob-bubble').childNodes[0].textContent = text + ' ';
+    }
+
+    function showNextBtn() {
+        document.getElementById('next-btn').classList.add('show');
+    }
+
+    function onNumInput(el, btnId) {
+        if (el.value && el.value.length > 0) {
+            document.getElementById(btnId).classList.add('show');
+        } else {
+            document.getElementById(btnId).classList.remove('show');
+        }
+    }
+
+    function onTextInput(el, btnId) {
+        if (el.value.trim().length > 0) {
+            document.getElementById(btnId).classList.add('show');
+        } else {
+            document.getElementById(btnId).classList.remove('show');
+        }
+    }
+
+    function onSelectInput(el, btnId) {
+        if (el.value) {
+            document.getElementById(btnId).classList.add('show');
+        }
+    }
+
+    function showErr(msg) {
+        var el = document.getElementById('ob-error');
+        el.textContent = msg;
+        el.classList.add('show');
+        speak(msg, L.lang_fallback || L.lang_code);
+    }
+
+    function speakCurrent() {
+        var title = document.getElementById('q-title').textContent;
+        speak(title, L.lang_fallback || L.lang_code);
+    }
+
+    // ── Voice input ───────────────────────────────────────────
+    function voiceInput(fieldId, btnId, nextBtnId) {
+        if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
+        var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        var rec = new SR();
+        rec.lang = localStorage.getItem('as_lang_code') || 'hi-IN';
+        rec.interimResults = false;
+        var btn = document.getElementById(btnId);
+        btn.classList.add('listening');
+        rec.onresult = function(e) {
+            var val = e.results[0][0].transcript;
+            document.getElementById(fieldId).value = val;
+            btn.classList.remove('listening');
+            if (nextBtnId) document.getElementById(nextBtnId).classList.add('show');
+        };
+        rec.onerror = rec.onend = function() { btn.classList.remove('listening'); };
+        rec.start();
+    }
+
+    // ── Build character ───────────────────────────────────────
+    function buildCharacter() {
+        var name = localStorage.getItem('character') || 'arth';
+        var fig  = document.getElementById('guide-figure');
+        if (name === 'arth') {
+            fig.innerHTML =
+                '<div class="char-hair-male"></div>' +
+                '<div class="char-head"><div class="char-eyes">' +
+                '<div class="char-eye"></div><div class="char-eye"></div>' +
+                '</div><div class="char-mouth"></div></div>' +
+                '<div class="char-neck"></div>' +
+                '<div class="char-body char-body-male"></div>' +
+                '<div class="char-arm char-arm-left arth"></div>' +
+                '<div class="char-arm char-arm-right arth"></div>' +
+                '<div class="char-leg char-leg-left arth"></div>' +
+                '<div class="char-leg char-leg-right arth"></div>' +
+                '<div class="char-shoe char-shoe-left"></div>' +
+                '<div class="char-shoe char-shoe-right"></div>';
+            fig.className = 'character-figure arth';
+        } else {
+            fig.innerHTML =
+                '<div class="char-hair-female"></div>' +
+                '<div class="char-head"><div class="char-eyes">' +
+                '<div class="char-eye"></div><div class="char-eye"></div>' +
+                '</div><div class="char-mouth"></div></div>' +
+                '<div class="char-neck"></div>' +
+                '<div class="char-body char-body-female"></div>' +
+                '<div class="char-arm char-arm-left sathi"></div>' +
+                '<div class="char-arm char-arm-right sathi"></div>' +
+                '<div class="char-leg char-leg-left sathi"></div>' +
+                '<div class="char-leg char-leg-right sathi"></div>';
+            fig.className = 'character-figure sathi';
+        }
+    }
+</script>
+
+</body>
+</html>

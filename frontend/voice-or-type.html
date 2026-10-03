@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>ArthSathi | बोलकर या टाइप करके</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/character.css">
+    <style>
+        .choice-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .choice-card {
+            flex: 1;
+            background: var(--white);
+            border: 3px solid transparent;
+            border-radius: var(--radius);
+            padding: 28px 16px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .choice-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-4px);
+        }
+
+        .choice-card.selected {
+            border-color: var(--primary);
+            background: #E8F5E9;
+        }
+
+        .choice-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .choice-label {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .choice-desc {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 6px;
+            display: block;
+        }
+
+        /* Arrow pointing down to both cards */
+        .arrow-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .arrow-down {
+            flex: 1;
+            text-align: center;
+            font-size: 28px;
+            color: var(--accent);
+            animation: bounceArrow 1s infinite;
+        }
+    </style>
+</head>
+<body>
+
+<div class="screen" id="screen-voicetype">
+
+    <!-- App Logo -->
+    <div class="app-header">
+        <div class="app-logo">Arth<span>Sathi</span></div>
+    </div>
+
+    <!-- Speech bubble -->
+    <div class="speech-bubble" id="question-bubble">
+        क्या आप बोलकर जवाब देना चाहते हैं या टाइप करके?
+        <button class="speak-btn" onclick="speakQuestion()" title="सुनें">🔊</button>
+    </div>
+
+    <!-- Arrows pointing to both cards -->
+    <div class="arrow-row" id="arrows">
+        <div class="arrow-down">↓</div>
+        <div class="arrow-down">↓</div>
+    </div>
+
+    <!-- Two choice cards -->
+    <div class="choice-row">
+
+        <!-- Voice option -->
+        <div class="choice-card" id="card-voice" onclick="selectMode('voice')">
+            <span class="choice-icon">🎤</span>
+            <span class="choice-label" id="label-voice">बोलकर</span>
+            <span class="choice-desc" id="desc-voice">आवाज़ से जवाब दें</span>
+        </div>
+
+        <!-- Type option -->
+        <div class="choice-card" id="card-type" onclick="selectMode('type')">
+            <span class="choice-icon">⌨️</span>
+            <span class="choice-label" id="label-type">टाइप करके</span>
+            <span class="choice-desc" id="desc-type">लिखकर जवाब दें</span>
+        </div>
+
+    </div>
+
+    <!-- Continue button — hidden until selection made -->
+    <button class="btn-primary pulse" id="btn-continue"
+            style="display:none;"
+            onclick="goNext()">
+        आगे बढ़ें →
+    </button>
+
+    <!-- Progress dots — step 3 of 7 -->
+    <div class="progress-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+</div>
+
+<!-- Fixed character guide -->
+<div class="character-guide" id="char-guide">
+    <div class="speech-bubble-guide" id="guide-bubble">
+        अपना तरीका चुनें 👆
+    </div>
+    <div class="character-figure" id="guide-figure"></div>
+</div>
+
+<script src="js/speech.js"></script>
+<script src="js/app.js"></script>
+<script>
+    var selectedMode = null;
+    var langData     = null;
+
+    window.addEventListener('load', function() {
+        buildCharacter();
+        loadLanguage();
+    });
+
+    function loadLanguage() {
+        var langCode = localStorage.getItem('as_language') || 'hi';
+
+        fetch('lang/' + langCode + '.json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                langData = data;
+
+                // Update all text on screen
+                document.getElementById('question-bubble').childNodes[0].textContent =
+                    data.voice_or_type + ' ';
+                document.getElementById('label-voice').textContent = data.voice;
+                document.getElementById('label-type').textContent  = data.type;
+                document.getElementById('btn-continue').textContent =
+                    (data.continue || 'Continue') + ' →';
+                document.getElementById('guide-bubble').textContent =
+                    data.voice_or_type_speak
+                        ? data.voice + ' / ' + data.type + ' ?'
+                        : 'Choose your way 👆';
+
+                // Auto-speak the question
+                var speechLang = data.lang_fallback || data.lang_code;
+                var questionText = data.voice_or_type_speak || data.voice_or_type;
+                setTimeout(function() {
+                    speak(questionText, speechLang);
+                }, 600);
+            });
+    }
+
+    function speakQuestion() {
+        if (!langData) return;
+        var speechLang   = langData.lang_fallback || langData.lang_code;
+        var questionText = langData.voice_or_type_speak || langData.voice_or_type;
+        speak(questionText, speechLang);
+    }
+
+    function selectMode(mode) {
+        selectedMode = mode;
+
+        // Highlight selected card
+        document.getElementById('card-voice').classList.remove('selected');
+        document.getElementById('card-type').classList.remove('selected');
+        document.getElementById('card-' + mode).classList.add('selected');
+
+        // Hide arrows
+        document.getElementById('arrows').style.display = 'none';
+
+        // Make character talk and nod
+        var fig = document.getElementById('guide-figure');
+        fig.classList.add('talking');
+        setTimeout(function() {
+            fig.classList.remove('talking');
+            fig.classList.add('nodding');
+            setTimeout(function() {
+                fig.classList.remove('nodding');
+            }, 2000);
+        }, 1500);
+
+        // Speak confirmation
+        if (langData) {
+            var speechLang = langData.lang_fallback || langData.lang_code;
+            var confirmText = mode === 'voice'
+                ? (langData.voice_selected || langData.voice + ' selected')
+                : (langData.type_selected  || langData.type  + ' selected');
+            speak(confirmText, speechLang);
+        }
+
+        // Save choice — map 'type' to 'text' to match DB constraint
+        var modeToSave = mode === 'type' ? 'text' : 'voice';
+        localStorage.setItem('as_input_mode', modeToSave);
+
+        // Show continue button
+        document.getElementById('btn-continue').style.display = 'inline-block';
+    }
+
+    function goNext() {
+        if (!selectedMode) return;
+        window.location.href = 'register.html';
+    }
+
+    function buildCharacter() {
+        var charName = localStorage.getItem('character') || 'arth';
+        var fig = document.getElementById('guide-figure');
+
+        if (charName === 'arth') {
+            fig.innerHTML =
+                '<div class="char-hair-male"></div>' +
+                '<div class="char-head"><div class="char-eyes">' +
+                '<div class="char-eye"></div><div class="char-eye"></div>' +
+                '</div><div class="char-mouth"></div></div>' +
+                '<div class="char-neck"></div>' +
+                '<div class="char-body char-body-male"></div>' +
+                '<div class="char-arm char-arm-left arth"></div>' +
+                '<div class="char-arm char-arm-right arth"></div>' +
+                '<div class="char-leg char-leg-left arth"></div>' +
+                '<div class="char-leg char-leg-right arth"></div>' +
+                '<div class="char-shoe char-shoe-left"></div>' +
+                '<div class="char-shoe char-shoe-right"></div>';
+            fig.className = 'character-figure arth';
+        } else {
+            fig.innerHTML =
+                '<div class="char-hair-female"></div>' +
+                '<div class="char-head"><div class="char-eyes">' +
+                '<div class="char-eye"></div><div class="char-eye"></div>' +
+                '</div><div class="char-mouth"></div></div>' +
+                '<div class="char-neck"></div>' +
+                '<div class="char-body char-body-female"></div>' +
+                '<div class="char-arm char-arm-left sathi"></div>' +
+                '<div class="char-arm char-arm-right sathi"></div>' +
+                '<div class="char-leg char-leg-left sathi"></div>' +
+                '<div class="char-leg char-leg-right sathi"></div>';
+            fig.className = 'character-figure sathi';
+        }
+    }
+</script>
+
+</body>
+</html>

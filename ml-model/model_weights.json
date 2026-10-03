@@ -1,0 +1,13 @@
+{
+  "weights": {
+    "state_match": 25.0,
+    "occupation_match": 25.0,
+    "caste_match": 20.0,
+    "income_proximity": 15.0,
+    "benefit_amount": 10.0,
+    "age_proximity": 5.0
+  },
+  "popularity_boosts": {},
+  "last_updated": "2026-10-03T01:55:02.071461",
+  "total_interactions_processed": 0
+}
